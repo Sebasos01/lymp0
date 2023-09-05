@@ -1,0 +1,46 @@
+P -> CMDs S1 | D S2 
+S1 -> [D S2] 
+S2 -> {D}[CMDs S1] 
+D -> defVar Name V | defProc Name '(' [Name {, Name}] ')' B 
+V -> Num | Name 
+B -> '{' CMDs '}' 
+CMDs -> BC S3 | NC S4 
+S3 -> {BC}[NC S4 | ; S5] 
+S4 -> [; S5] 
+S5 -> [BC S3 | NC S4] 
+BC -> [if CND B else | while CND | repeat V times] (B | SC) 
+NC -> SC | Name ('(' [A {, A}] ')' | = V) 
+CND -> {not :}(facing '(' Car | can '(' SC) ')' 
+SC -> (jump '(' V , V | (walk | leap) '(' V [, (Dir | Car)] | turn '(' Dir | turnto '(' Car | drop '(' V | get '(' V | grab '(' V | letgo '(' V | nop '(') ')' 
+A -> V | Dir | Car 
+
+Conjuntos de selección:
+CS(V) = CS(Vλ) = CS((Num | Name)λ) = CS(Numλ) U CS(Nameλ) = {Num} U {Name} = {Num, Name}
+
+CS(A) = CS(Aλ) = CS((V | Dir | Car)λ) = CS(Vλ) U CS(Dirλ) U CS(Carλ) = {Num, Name} U {Dir} U {Car} = {Num, Name, Dir, Car}
+
+CS(SC) = CS(SCλ) = CS(((jump '(' V , V | (walk | leap) '(' V [, (Dir | Car)] | turn '(' Dir | turnto '(' Car | drop '(' V | get '(' V | grab '(' V | letgo '(' V | nop '(') ')')λ) = CS(((jump '(' V , V | (walk | leap) '(' V [, (Dir | Car)] | turn '(' Dir | turnto '(' Car | drop '(' V | get '(' V | grab '(' V | letgo '(' V | nop '(') ')')λ) = CS(jump '(' V , V ')') U CS((walk | leap) '(' V [, (Dir | Car)] ')') U CS(turn '(' Dir ')') U CS(turnto '(' Car ')') U CS(drop '(' V ')') U CS(get '(' V ')') U CS(grab '(' V ')') U CS(letgo '(' V ')') U CS(nop '(' ')') = {jump} U (CS(walk '(' V [, (Dir | Car)] ')') U CS(leap '(' V [, (Dir | Car)] ')')) U {turn} U {turnto} U {drop} U {get} U {grab} U {letgo} U {nop} = {jump} U ({walk} U {leap}) U {turn} U {turnto} U {drop} U {get} U {grab} U {letgo} U {nop} = {jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop}
+
+CS(NC) = CS(NCλ) = CS((SC | Name ('(' [A {, A}] ')' | = V))λ) = CS(SCλ) U CS((Name ('(' [A {, A}] ')' | = V))λ) = {jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop} U {Name} = {Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop}
+
+CS(CND) = CS({not :}(facing '(' Car | can '(' SC) ')') = CS(not :) U CS((facing '(' Car | can '(' SC) ')') = {not} U (CS(facing '(' Car ')') U CS(can '(' SC ')')) = {not} U ({facing} U {can}) = {not, facing, can}
+
+CS(B) = CS('{' CMDs '}') = {'{'}
+
+CS(BC) = CS([if CND B else | while CND | repeat V times] B) = CS(if CND B else | while CND | repeat V times) U CS(B) = (CS(if CND B else) U CS(while CND) U CS(repeat V times)) U {'{'} = ({if} U {while} U {repeat}) U {'{'} = {if, while, repeat, '{'}
+
+CS(CMDs) = CS(BC S3 | NC S4) = CS(BC S3) U CS(NC S4) = {if, while, repeat, '{'} U {Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop} = {if, while, repeat, '{', Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop}
+
+CS(S3) = CS({BC}[NC S4 | ; S5]) = CS(BC) U CS([NC S4 | ; S5]) = {if, while, repeat, '{'} U (CS(NC S4 | ; S5) U CS(λ)) = {if, while, repeat, '{'} U ((CS(NC S4) U CS(; S5)) U void_set) = {if, while, repeat, '{'} U (({Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop} U {;}) U void_set) = {if, while, repeat, '{'} U {Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop, ;} = {if, while, repeat, '{', Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop, ;}
+
+CS(S4) = CS([; S5]) = CS(; S5) U CS(λ) = {;} U void_set = {;}
+
+CS(S5) = CS([BC S3 | NC S4]) = CS(BC S3 | NC S4) U CS(λ) = (CS(BC S3) U CS(NC S4)) U void_set = {if, while, repeat, '{'} U {Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop} = {if, while, repeat, '{', Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop}
+
+CS(D) = CS(defVar Name V | defProc Name '(' [Name {, Name}] ')' B) = CS(defVar Name V) U CS(defProc Name '(' [Name {, Name}] ')' B) = {defVar} U {defProc} = {defVar, defProc}
+
+CS(S1) = CS([D S2]) = CS(D S2) U CS(λ) = {defVar, defProc} U void_set = {defVar, defProc}
+
+CS(S2) = CS({D}[CMDs S1]) = CS(D) U CS([CMDs S1]) = {defVar, defProc} U (CS(CMDs S1) U CS(λ)) = {defVar, defProc} U ({if, while, repeat, '{', Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop} U void_set) = {defVar, defProc, if, while, repeat, '{', Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop}
+
+CS(P) = CS(CMDs S1 | D S2) = CS(CMDs S1) U CS(D S2) = {if, while, repeat, '{', Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop} U {defVar, defProc} = {if, while, repeat, '{', Name, jump, walk, leap, turn, turnto, drop, get, grab, letgo, nop, defVar, defProc}
